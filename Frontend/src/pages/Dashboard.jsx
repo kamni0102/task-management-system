@@ -57,22 +57,21 @@ export default function Dashboard() {
     }
 
     try {
-      // Priority must match model casing: 'Low', 'Medium', 'High'
-      const formattedPriority = taskPriority.charAt(0).toUpperCase() + taskPriority.slice(1).toLowerCase();
-      
-      // Status formatting
-      const formattedStatus = taskStatus.toLowerCase().replace(' ', '_');
+      // Map statuses cleanly to match standard schema types
+      let mappedStatus = 'To Do';
+      if (taskStatus === 'In Progress') mappedStatus = 'In Progress';
+      if (taskStatus === 'Completed') mappedStatus = 'Completed';
 
       await API.post('/tasks', {
         title: taskTitle,
         description: taskDescription,
-        priority: formattedPriority, // Sends 'Medium', 'High', or 'Low'
-        status: formattedStatus,
-        dueDate: taskDueDate || new Date(),
+        priority: taskPriority, 
+        status: mappedStatus,
+        dueDate: taskDueDate || new Date().toISOString(),
         project: currentProject._id
       });
 
-      // Reset form and refresh
+      // Reset form
       setTaskTitle('');
       setTaskDescription('');
       setTaskPriority('Medium');
@@ -82,39 +81,8 @@ export default function Dashboard() {
 
       window.location.reload();
     } catch (err) {
-      console.error('Error creating task:', err);
-      alert('Failed to create task. Check console for details.');
-    }
-  };
-
-    if (!currentProject?._id) {
-      alert('No active project found to attach task.');
-      return;
-    }
-
-    try {
-      await API.post('/tasks', {
-        title: taskTitle,
-        description: taskDescription,
-        priority: taskPriority.toLowerCase(),
-        status: taskStatus.toLowerCase().replace(' ', '_'),
-        dueDate: taskDueDate || new Date(),
-        project: currentProject._id
-      });
-
-      // Reset form and refresh board
-      setTaskTitle('');
-      setTaskDescription('');
-      setTaskPriority('Medium');
-      setTaskStatus('To Do');
-      setTaskDueDate('');
-      setShowTaskModal(false);
-
-      // Reload window/board to fetch new task
-      window.location.reload();
-    } catch (err) {
-      console.error('Error creating task:', err);
-      alert('Failed to create task. Check console for details.');
+      console.error('Error creating task:', err?.response?.data || err);
+      alert(err?.response?.data?.message || 'Failed to create task. Check console for details.');
     }
   };
 
@@ -151,7 +119,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Create Task Modal */}
+        {/* Modal */}
         {showTaskModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-slate-800 rounded-xl max-w-md w-full p-6 border border-slate-700 shadow-2xl">
