@@ -57,6 +57,42 @@ export default function Dashboard() {
     }
 
     try {
+      // Priority must match model casing: 'Low', 'Medium', 'High'
+      const formattedPriority = taskPriority.charAt(0).toUpperCase() + taskPriority.slice(1).toLowerCase();
+      
+      // Status formatting
+      const formattedStatus = taskStatus.toLowerCase().replace(' ', '_');
+
+      await API.post('/tasks', {
+        title: taskTitle,
+        description: taskDescription,
+        priority: formattedPriority, // Sends 'Medium', 'High', or 'Low'
+        status: formattedStatus,
+        dueDate: taskDueDate || new Date(),
+        project: currentProject._id
+      });
+
+      // Reset form and refresh
+      setTaskTitle('');
+      setTaskDescription('');
+      setTaskPriority('Medium');
+      setTaskStatus('To Do');
+      setTaskDueDate('');
+      setShowTaskModal(false);
+
+      window.location.reload();
+    } catch (err) {
+      console.error('Error creating task:', err);
+      alert('Failed to create task. Check console for details.');
+    }
+  };
+
+    if (!currentProject?._id) {
+      alert('No active project found to attach task.');
+      return;
+    }
+
+    try {
       await API.post('/tasks', {
         title: taskTitle,
         description: taskDescription,
