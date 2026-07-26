@@ -46,7 +46,11 @@ server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 const cors = require('cors');
 
+const cors = require('cors');
+
+// Allow requests from any origin (Netlify, Vercel, localhost)
 app.use(cors({
-  origin: '*', // Add your Vercel URL here
-  credentials: true
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
