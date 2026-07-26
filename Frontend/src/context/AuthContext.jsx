@@ -1,33 +1,38 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import API from '../services/api';
 
-export const AuthContext = createContext(null);
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem('userInfo');
-      return savedUser ? JSON.parse(savedUser) : null;
-    } catch {
-      return null;
-    }
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
   });
 
   const login = async (email, password) => {
-    const { data } = await API.post('/auth/login', { email, password });
-    setUser(data);
-    localStorage.setItem('userInfo', JSON.stringify(data));
+    const res = await API.post('/auth/login', { email, password });
+    if (res.data.token) {
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user || res.data));
+      setUser(res.data.user || res.data);
+    }
+    return res.data;
   };
 
   const register = async (name, email, password) => {
-    const { data } = await API.post('/auth/register', { name, email, password });
-    setUser(data);
-    localStorage.setItem('userInfo', JSON.stringify(data));
+    const res = await API.post('/auth/register', { name, email, password });
+    if (res.data.token) {
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user || res.data));
+      setUser(res.data.user || res.data);
+    }
+    return res.data;
   };
 
   const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
-    localStorage.removeItem('userInfo');
   };
 
   return (
@@ -36,5 +41,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-export default AuthContext;
