@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import API from '../services/api';
 import { SocketContext } from '../context/SocketContext';
-import KanbanBoard from '../components/kanban/KanbanBoard';
+import KanbanBoard from '../components/kanban/kanbanBoard';
 import { Plus, Kanban, X, Loader2 } from 'lucide-react';
 
 export default function Dashboard() {
