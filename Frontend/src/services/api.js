@@ -1,13 +1,13 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'https://task-managaement-system.onrender.com', // Replace with your actual Render URL
+  baseURL: import.meta.env.VITE_API_URL || 'https://task-managaement-system.onrender.com/api',
 });
 
-// Interceptor to add JWT token automatically
+// Attach JWT token to requests if present
 API.interceptors.request.use((req) => {
-  if (localStorage.getItem('userInfo')) {
-    const { token } = JSON.parse(localStorage.getItem('userInfo'));
+  const token = localStorage.getItem('token');
+  if (token) {
     req.headers.Authorization = `Bearer ${token}`;
   }
   return req;
