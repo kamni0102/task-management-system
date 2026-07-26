@@ -10,6 +10,7 @@ export default function Dashboard() {
   const [currentProject, setCurrentProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showTaskModal, setShowTaskModal] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // Trigger re-render
 
   // Form State
   const [taskTitle, setTaskTitle] = useState('');
@@ -60,18 +61,19 @@ export default function Dashboard() {
       await API.post('/tasks', {
         title: taskTitle,
         description: taskDescription,
-        priority: taskPriority, // 'Low', 'Medium', 'High'
-        status: taskStatus,     // 'To Do', 'In Progress', 'Review', 'Completed'
+        priority: taskPriority,
+        status: taskStatus,
         dueDate: taskDueDate || new Date(),
         project: currentProject._id
       });
 
+      // Reset Form
       setTaskTitle('');
       setTaskDescription('');
       setShowTaskModal(false);
 
-      // Reload to reflect immediately on the board
-      window.location.reload();
+      // Force Kanban board component to re-fetch tasks immediately
+      setRefreshKey((prev) => prev + 1);
     } catch (err) {
       console.error('Error creating task:', err);
       alert('Failed to create task.');
@@ -100,18 +102,18 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* Board View */}
+        {/* Board View with key prop for forced refresh */}
         {loading ? (
           <div className="text-center py-20 text-gray-400">Loading workspace...</div>
         ) : currentProject ? (
-          <KanbanBoard projectId={currentProject._id} />
+          <KanbanBoard key={refreshKey} projectId={currentProject._id} />
         ) : (
           <div className="text-center py-20 text-gray-400">
             No active project found.
           </div>
         )}
 
-        {/* Modal */}
+        {/* Create Task Modal */}
         {showTaskModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-slate-800 rounded-xl max-w-md w-full p-6 border border-slate-700 shadow-2xl">
@@ -172,6 +174,7 @@ export default function Dashboard() {
                     >
                       <option value="To Do">To Do</option>
                       <option value="In Progress">In Progress</option>
+                      <option value="Review">Review</option>
                       <option value="Completed">Completed</option>
                     </select>
                   </div>
