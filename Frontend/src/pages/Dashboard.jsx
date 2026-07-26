@@ -52,37 +52,29 @@ export default function Dashboard() {
     }
 
     if (!currentProject?._id) {
-      alert('No active project found to attach task.');
+      alert('No active project found.');
       return;
     }
 
     try {
-      // Map statuses cleanly to match standard schema types
-      let mappedStatus = 'To Do';
-      if (taskStatus === 'In Progress') mappedStatus = 'In Progress';
-      if (taskStatus === 'Completed') mappedStatus = 'Completed';
-
       await API.post('/tasks', {
         title: taskTitle,
         description: taskDescription,
-        priority: taskPriority, 
-        status: mappedStatus,
-        dueDate: taskDueDate || new Date().toISOString(),
+        priority: taskPriority, // 'Low', 'Medium', 'High'
+        status: taskStatus,     // 'To Do', 'In Progress', 'Review', 'Completed'
+        dueDate: taskDueDate || new Date(),
         project: currentProject._id
       });
 
-      // Reset form
       setTaskTitle('');
       setTaskDescription('');
-      setTaskPriority('Medium');
-      setTaskStatus('To Do');
-      setTaskDueDate('');
       setShowTaskModal(false);
 
+      // Reload to reflect immediately on the board
       window.location.reload();
     } catch (err) {
-      console.error('Error creating task:', err?.response?.data || err);
-      alert(err?.response?.data?.message || 'Failed to create task. Check console for details.');
+      console.error('Error creating task:', err);
+      alert('Failed to create task.');
     }
   };
 
